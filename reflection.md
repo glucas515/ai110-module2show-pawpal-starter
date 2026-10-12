@@ -7,6 +7,16 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+My initial UML design has four classes: Owner, Pet, Task, and Scheduler.
+
+- Owner holds a name and a dictionary of preferences (e.g., preferred start time, max daily care minutes). It's a simple data holder with no behavior of its own.
+- Pet holds a name, species, and a reference back to its Owner. Also just a data holder.
+- Task represents a single care task: a title, duration in minutes, priority (low/medium/high), and a reference to the Pet it belongs to. Another data holder.
+- Scheduler is the only class with real behavior. It takes a list of Tasks and the available time for the day, and is responsible for generate_plan() (choosing and ordering tasks that fit the time budget, prioritizing higher-priority tasks) and explain_plan() (describing why each task was included/excluded and in what order).
+
+I kept Owner, Pet, and Task as plain data holders (implemented as Python dataclasses) and put all the actual logic in one place (Scheduler), so the scheduling behavior isn't scattered across multiple classes.
+
+
 **b. Design changes**
 
 - Did your design change during implementation?
