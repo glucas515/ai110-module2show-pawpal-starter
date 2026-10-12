@@ -18,6 +18,13 @@ class Pet:
 	owner: Owner = field(repr=False, compare=False)
 	tasks: list["Task"] = field(default_factory=list)
 
+	def add_task(self, task: "Task") -> None:
+		task.pet = self
+		self.tasks.append(task)
+
+	def remove_task(self, task: "Task") -> None:
+		self.tasks.remove(task)
+
 
 @dataclass
 class Task:
