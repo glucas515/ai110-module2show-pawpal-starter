@@ -1,0 +1,61 @@
+classDiagram
+    class Owner {
+        +name: str
+        +preferences: dict[str, object]
+        +pets: list[Pet]
+        +add_pet(pet: Pet): None
+        +remove_pet(pet: Pet): None
+        +get_all_tasks(): list[Task]
+    }
+
+    class Pet {
+        +name: str
+        +species: str
+        +owner: Owner
+        +tasks: list[Task]
+        +add_task(task: Task): None
+        +remove_task(task: Task): None
+    }
+
+    class Task {
+        +title: str
+        +duration_minutes: int
+        +priority: str
+        +pet: Pet
+        +frequency: str
+        +completed: bool
+        +preferred_time: str | None
+        +due_date: date | None
+        +__post_init__(): None
+        +mark_complete(): Task | None
+    }
+
+    class ScheduledTask {
+        +task: Task
+        +start_time: str
+    }
+
+    class Scheduler {
+        +owner: Owner
+        +available_minutes: int
+        +plan: list[ScheduledTask]
+        +skipped: list[Task]
+        +__init__(owner: Owner, available_minutes: int): None
+        +get_all_tasks(): list[Task]
+        +get_pending_tasks(): list[Task]
+        +sort_tasks(tasks: list[Task]): list[Task]
+        +sort_by_time(tasks: list[Task]): list[Task]
+        +filter_tasks(pet_name: str | None, completed: bool | None): list[Task]
+        +detect_conflicts(): list[str]
+        +generate_plan(): None
+        +explain_plan(): str
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Task : contains
+    Task "*" --> "1" Pet : belongs to
+    Scheduler "1" --> "1" Owner : manages
+    Scheduler "1" --> "0..*" ScheduledTask : plan
+    Scheduler "1" --> "0..*" Task : skipped
+    ScheduledTask "*" --> "1" Task : wraps
+    Task ..> Task : creates next occurrence
