@@ -128,18 +128,39 @@ else:
 st.divider()
 
 st.subheader("Build Schedule")
-st.caption("This button should call your scheduling logic once you implement it.")
+st.caption("Build today's plan from the pending tasks.")
 
 if st.button("Generate schedule"):
-    st.warning(
-        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-    )
-    st.markdown(
-        """
-Suggested approach:
-1. Design your UML (draft).
-2. Create class stubs (no logic).
-3. Implement scheduling behavior.
-4. Connect your scheduler here and display results.
-"""
-    )
+    scheduler.generate_plan()
+    if not scheduler.plan:
+        st.info("No tasks to schedule yet. Add a task above.")
+    else:
+        total_minutes = sum(item.task.duration_minutes for item in scheduler.plan)
+        st.success(
+            f"Scheduled {len(scheduler.plan)} tasks, using {total_minutes} of "
+            f"{scheduler.available_minutes} available minutes."
+        )
+        st.table([
+            {
+                "start": item.start_time,
+                "task": item.task.title,
+                "pet": item.task.pet.name,
+                "priority": item.task.priority,
+                "duration_minutes": item.task.duration_minutes,
+            }
+            for item in scheduler.plan
+        ])
+
+    if scheduler.skipped:
+        skipped_tasks = ", ".join(
+            f"{task.title} ({task.pet.name})" for task in scheduler.skipped
+        )
+        st.warning(
+            f"Skipped tasks: {skipped_tasks}. Increase the available minutes to schedule them."
+        )
+
+    for conflict in scheduler.detect_conflicts():
+        st.warning(f"{conflict} Change one of those tasks' times to resolve the conflict.")
+
+    with st.expander("Why this plan?"):
+        st.text(scheduler.explain_plan())
