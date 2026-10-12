@@ -39,10 +39,25 @@ At minimum, your system should:
 
 st.divider()
 
-st.subheader("Quick Demo Inputs (UI only)")
-owner_name = st.text_input("Owner name", value="Jordan")
+st.subheader("Owner and Pets")
+if "owner" not in st.session_state:
+    st.session_state.owner = Owner(name="Jordan", preferences={"day_start": "08:00"})
+owner = st.session_state.owner
+
+owner_name = st.text_input("Owner name", value=owner.name)
+owner.name = owner_name
 pet_name = st.text_input("Pet name", value="Mochi")
 species = st.selectbox("Species", ["dog", "cat", "other"])
+
+if st.button("Add pet"):
+    pet = Pet(pet_name, species, owner)
+    owner.add_pet(pet)
+    st.success(f"Added {pet_name}.")
+
+if owner.pets:
+    st.table([{"name": pet.name, "species": pet.species} for pet in owner.pets])
+else:
+    st.info("No pets yet.")
 
 st.markdown("### Tasks")
 st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
