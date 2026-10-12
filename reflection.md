@@ -51,8 +51,8 @@ A user of PawPal+ should be able to:
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+
+My conflict detection only checks for exact time matches. It warns when two pending tasks have the same preferred_time, but it doesn't check whether one task's duration runs into another's start. For example, a 30-minute walk at 08:00 and a task at 08:15 would not be flagged. I chose this because it is simple, fast, and easy to explain to a pet owner, and because generate_plan() places tasks back to back, so the plan itself can never contain overlaps. The cost is that two tasks with different preferred times can still clash in real life. With more time I would compare each task's start and end time (start plus duration) to catch overlaps.
 
 ---
 
