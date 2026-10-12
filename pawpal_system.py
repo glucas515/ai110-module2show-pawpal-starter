@@ -138,8 +138,12 @@ class Scheduler:
 		return tasks
 
 	def get_pending_tasks(self) -> list[Task]:
-		"""Return the tasks that are still incomplete."""
-		return [task for task in self.get_all_tasks() if task.completed is False]
+		"""Return incomplete tasks that are due today or have no due date."""
+		return [
+			task
+			for task in self.get_all_tasks()
+			if task.completed is False and (task.due_date is None or task.due_date <= date.today())
+		]
 
 	def sort_tasks(self, tasks: list[Task]) -> list[Task]:
 		"""Sort tasks by priority and duration."""
