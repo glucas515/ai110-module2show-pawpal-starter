@@ -100,6 +100,23 @@ class Scheduler:
 		"""Return all tasks for the owner managed by this scheduler."""
 		return self.owner.get_all_tasks()
 
+	def sort_by_time(self, tasks: list[Task]) -> list[Task]:
+		"""Sort tasks by preferred time, placing tasks without one last."""
+		return sorted(tasks, key=lambda task: (task.preferred_time is None, task.preferred_time or ""))
+
+	def filter_tasks(
+		self,
+		pet_name: str | None = None,
+		completed: bool | None = None,
+	) -> list[Task]:
+		"""Return tasks matching the provided pet name and completion status."""
+		tasks = self.get_all_tasks()
+		if pet_name is not None:
+			tasks = [task for task in tasks if task.pet.name == pet_name]
+		if completed is not None:
+			tasks = [task for task in tasks if task.completed == completed]
+		return tasks
+
 	def get_pending_tasks(self) -> list[Task]:
 		"""Return the tasks that are still incomplete."""
 		return [task for task in self.get_all_tasks() if task.completed is False]
