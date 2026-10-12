@@ -12,6 +12,13 @@
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+**c. Core user actions**
+
+A user of PawPal+ should be able to:
+1. Add a pet care task (Title, duration, priority)
+2. Enter basic owner and pet info (name,species, preferences)
+3. Generate a daily schedule that picks and orders based on time and priority, with explaination of why
+
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
