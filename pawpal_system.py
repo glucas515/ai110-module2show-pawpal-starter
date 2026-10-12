@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 VALID_PRIORITIES = ("low", "medium", "high")
+PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2}
 VALID_FREQUENCIES = ('once', 'daily', 'weekly')
 
 
@@ -72,7 +73,16 @@ class Scheduler:
 		self.plan: list[ScheduledTask] = []
 
 	def get_all_tasks(self) -> list[Task]:
-		return [task for pet in self.owner.pets for task in pet.tasks]
+		return self.owner.get_all_tasks()
+
+	def get_pending_tasks(self) -> list[Task]:
+		return [task for task in self.get_all_tasks() if task.completed is False]
+
+	def sort_tasks(self, tasks: list[Task]) -> list[Task]:
+		return sorted(
+			tasks,
+			key=lambda task: (PRIORITY_ORDER[task.priority], task.duration_minutes),
+		)
 
 	def generate_plan(self) -> None:
 		"""Populate self.plan using get_all_tasks() and self.owner.preferences."""
