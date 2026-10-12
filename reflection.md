@@ -49,6 +49,8 @@ A user of PawPal+ should be able to:
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+My scheduler considers the minutes available in the day, each task's priority (high, medium, low), how long each task takes, and whether a task is still pending and due today. It also reads an optional day_start preference from the owner, which defaults to 08:00. Time and priority matter most, because a plan that doesn't fit the day, or that puts grooming ahead of feeding, isn't useful. Tasks are ordered by priority, then shortest first, and packed back to back from the day start. Anything that doesn't fit is skipped and listed. A task's preferred_time is used for sorting and conflict warnings, but the plan doesn't place tasks at those times
+
 **b. Tradeoffs**
 
 
@@ -63,11 +65,18 @@ My conflict detection only checks for exact time matches. It warns when two pend
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
+I used GitHub Copilot in VS Code, mostly in Agent mode, to write and edit code, and a separate AI chat to plan each step and double-check Copilot's diffs before I clicked Keep. Copilot was most effective on multi-step edits where it could read the files, change them, and run a quick check (py_compile or pytest) before I approved. The most helpful prompts were narrow and explicit, such as "change only the Scheduler class," "don't modify pawpal_system.py," and "keep existing methods exactly as they are." Asking for a plan in Ask mode before building, for the test plan and the UML updates, also saved time.
+
+Using a new chat for each feature kept Copilot focused on one change and kept each diff small enough to review properly. It also stopped old instructions from leaking into new tasks. Planning chats (test plan, UML, algorithm ideas) stayed separate from implementation chats, so ideas didn't get mixed into the code.
+
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
 
+When I asked for a lightweight conflict check that never crashes, Copilot wrapped the whole method in try/except Exception and returned an empty list on any error. I removed it, because a real bug would have shown up as "no conflicts" and not as an error. The method already returns a warning string when there is a conflict, which is all the feature needed. I also kept recurring tasks simpler than Copilot's planning suggestion, which generated occurrences per day and tracked completion on each one. In my version, marking a daily or weekly task complete creates one new task due tomorrow or in seven days.
+
+I read every diff before clicking Keep and ran pytest and main.py after each change. Reading diffs caught a change that left the old tasks parameter in the Scheduler signature. Running the Streamlit app caught a bug the diff didn't show: a task displayed a success message but never appeared in the table, because the pet dropdown returned a different Pet object than the one stored in owner.pets. I fixed it by selecting the pet by its position in the list.
 ---
 
 ## 4. Testing and Verification
@@ -77,10 +86,14 @@ My conflict detection only checks for exact time matches. It warns when two pend
 - What behaviors did you test?
 - Why were these tests important?
 
+I wrote seven pytest tests. They check that marking a task complete changes its status and that adding a task increases a pet's task count. They check that sort_by_time returns tasks in clock order with untimed tasks last. They check that completing a daily task creates one new task due tomorrow without duplicating it if called twice, and that a one-time task doesn't recur. They also check that detect_conflicts flags two pending tasks at the same time and stays quiet for different times or a completed task. These are the behaviors the demo and the UI depend on, so a regression would show up right away.
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
+
+About 4 out of 5. The sorting, recurrence and conflict logic are covered by tests, and I checked the full plan through main.py and the Streamlit app. I'm not at 5 because generate_plan() has no unit tests yet. Next I would test a task that exactly fills the remaining time, a skipped task followed by a shorter one that still fits, an empty schedule, filtering with duplicate pet names, input validation errors, and conflicts between overlapping times and not just identical ones.
 
 ---
 
@@ -90,10 +103,18 @@ My conflict detection only checks for exact time matches. It warns when two pend
 
 - What part of this project are you most satisfied with?
 
+I'm most satisfied with building in layers. The classes and scheduling logic worked in a CLI demo and in tests before I touched Streamlit, so when the UI misbehaved I knew where to look. Keeping responsibilities clear also helped: the Scheduler gets its tasks through the Owner instead of keeping its own copy, which made later features easy to add.
+
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+I would let generate_plan() place tasks at their preferred times instead of only using them for sorting and conflict warnings, and detect overlapping durations and not just identical start times. I would add a way to mark a task complete from the Streamlit app, since recurrence is currently only demonstrated in main.py and the tests. I would also add unit tests for generate_plan() and save the data so it survives restarting the app.
+
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+Working as the lead architect meant I made the design decisions and the AI did most of the typing. Copilot did what the prompt said, including things I didn't want, like swallowing errors, and sometimes only part of what I asked for. What worked best was small, specific prompts, reading every diff, and checking behavior with tests and by running the app. Decisions about what each class owns, what to leave out, and what counts as a conflict were mine to make, and the AI couldn't make them for me.
