@@ -173,18 +173,19 @@ class Scheduler:
 		day_start = self.owner.preferences.get('day_start', '08:00')
 		hours, minutes = (int(part) for part in day_start.split(':'))
 		current_minutes = hours * 60 + minutes
-		minutes_used = 0
+		remaining_minutes = self.available_minutes
 
 		for task in pending_tasks:
-			if minutes_used + task.duration_minutes <= self.available_minutes:
-				start_hours, start_minutes = divmod(current_minutes, 60)
-				self.plan.append(
-					ScheduledTask(task, f'{start_hours:02d}:{start_minutes:02d}')
-				)
-				current_minutes += task.duration_minutes
-				minutes_used += task.duration_minutes
-			else:
+			if task.duration_minutes > remaining_minutes:
 				self.skipped.append(task)
+				continue
+
+			start_hours, start_minutes = divmod(current_minutes, 60)
+			self.plan.append(
+				ScheduledTask(task, f'{start_hours:02d}:{start_minutes:02d}')
+			)
+			current_minutes += task.duration_minutes
+			remaining_minutes -= task.duration_minutes
 
 	def explain_plan(self) -> str:
 		"""Return the explanation text for self.plan."""
