@@ -22,6 +22,17 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## ✨ Features
+
+- Priority-based scheduling (`Scheduler.generate_plan` and `Scheduler.sort_tasks`): Schedules pending tasks in priority order within the available daily minutes.
+- Sorting by time (`Scheduler.sort_by_time`): Orders tasks by `preferred_time`, placing tasks without a preferred time last.
+- Filtering by pet and status (`Scheduler.filter_tasks` and `Scheduler.get_pending_tasks`): Returns tasks for a selected pet and/or pending/completed status, and the pending tasks due today or without a due date.
+- Conflict warnings (`Scheduler.detect_conflicts`): Flags pending tasks that share the same preferred time.
+- Daily and weekly recurrence (`Task.mark_complete`): Marks a task complete and creates the next daily or weekly task when appropriate.
+- Input validation (`Task.__post_init__` and `Scheduler.__init__`): Enforces valid durations, priorities, frequencies, time strings, and positive available minutes.
+- Plan explanation (`Scheduler.explain_plan`): Produces a simple text summary of the scheduled start times and task names.
+- Streamlit UI (`app.py`): Lets users add pets and tasks, filter the task list, and generate a schedule in the browser.
+
 ## Getting started
 
 ### Setup
@@ -97,25 +108,72 @@ All 7 tests pass and they cover the sorting, recurrence and conflict-detection l
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
 
-|        Feature                          Method(s)                               Notes 
-|------------------------------|--------------------------------|----------------------------------|
-|Sorting                   |       Scheduler.sort_by_time()      |    Orders tasks by `preferred_time`, with untimed tasks last.|
+| Feature | Method(s) | Notes |
+|---------|-----------|-------|
+| Sorting | `Scheduler.sort_by_time()` | Orders tasks by `preferred_time`, with untimed tasks last. |
+| Filtering | `Scheduler.filter_tasks()` | Filters by pet name and/or completion status. |
+| Conflict detection | `Scheduler.detect_conflicts()` | Returns a warning when pending tasks share the same time. |
+| Recurring tasks | `Task.mark_complete()` | Creates the next daily or weekly task when one is completed. |
 
- |Filtering                |      Scheduler.filter_tasks()       |       Filters by pet name and/or completion status.           |
-
- |Conflict detection       |     Scheduler.detect_conflicts()    |    Returns a warning when pending tasks share the same time   |
-
- |Recurring tasks          |         Task.mark_complete()        |       Creates the next daily or weekly task when one is completed. |
 ## 📸 Demo Walkthrough
+### Main UI features
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+Run the app with `python -m streamlit run app.py`. From the page you can:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+- **Add pets** to an owner (name and species) and see them in a table.
+- **Set the available minutes** for today.
+- **Add tasks** for a chosen pet with a title, duration, priority, an optional preferred time (`HH:MM`), and a frequency of once, daily or weekly. A badly formatted time shows an error and doesn't crash the app.
+- **Filter the task table** by pet and by status (pending or completed). The table is sorted by time, with untimed tasks last.
+- **Generate a schedule** and see the plan, any skipped tasks, any conflict warnings, and a "Why this plan?" explanation.
+
+### Example workflow
+
+1. Enter an owner name and add a pet, for example Mochi the dog.
+2. Add a few tasks, for example Feeding (10 min, high, 07:30), Morning walk (30 min, high, 08:00) and Grooming (45 min, low, 08:00).
+3. Leave the available minutes at 60 and click **Generate schedule**.
+4. Read the result: a success message, a table of start times, a warning for tasks that didn't fit, and a warning when two tasks share a time.
+
+### Key Scheduler behaviors shown
+
+- **Priority scheduling:** tasks are ordered by priority, then shortest first, and packed from the day start. Anything that doesn't fit is skipped and listed.
+- **Sorting by time:** `sort_by_time()` puts tasks in clock order with untimed tasks last.
+- **Filtering:** `filter_tasks()` narrows tasks by pet and by completion status.
+- **Conflict warnings:** `detect_conflicts()` warns when two pending tasks have the same preferred time.
+- **Recurrence:** completing a daily or weekly task creates the next one, due tomorrow or in seven days.
+
+### Sample CLI output
+
+Running `python main.py` prints:
+
+```
+Today's Schedule
+08:00 - Feeding (Mochi) [high, 10 min]
+08:10 - Morning walk (Mochi) [high, 30 min]
+08:40 - Litter box (Whiskers) [medium, 15 min]
+Skipped (not enough time)
+Grooming (Whiskers) [low, 45 min]
+Tasks sorted by time
+07:30 - Feeding (Mochi)
+07:30 - Feeding (Mochi)
+08:00 - Morning walk (Mochi)
+08:00 - Grooming (Whiskers)
+no time - Litter box (Whiskers)
+Tasks for Mochi
+Morning walk (Mochi)
+Feeding (Mochi)
+Feeding (Mochi)
+Completed tasks
+Feeding (Mochi)
+Pending tasks
+Morning walk (Mochi)
+Feeding (Mochi)
+Grooming (Whiskers)
+Litter box (Whiskers)
+Conflicts
+Warning: conflict at 08:00 - Morning walk (Mochi), Grooming (Whiskers)
+```
+
+
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
