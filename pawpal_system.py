@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import date, timedelta
 
 VALID_PRIORITIES = ("low", "medium", "high")
 PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2}
@@ -51,6 +52,7 @@ class Task:
 	frequency: str = 'daily'
 	completed: bool = False
 	preferred_time: str | None = None
+	due_date: date | None = None
 
 	def __post_init__(self) -> None:
 		"""Validate the task data during initialization."""
@@ -75,9 +77,27 @@ class Task:
 			if hours > 23 or minutes > 59:
 				raise ValueError("preferred_time must be a valid 24-hour HH:MM string")
 
-	def mark_complete(self) -> None:
-		"""Mark the task as complete."""
+	def mark_complete(self) -> "Task | None":
+		"""Complete this task and create its next recurrence when applicable."""
+		if self.completed:
+			return None
 		self.completed = True
+		if self.frequency == 'once':
+			return None
+
+		days_until_due = 1 if self.frequency == 'daily' else 7
+		new_task = Task(
+			self.title,
+			self.duration_minutes,
+			self.priority,
+			self.pet,
+			frequency=self.frequency,
+			completed=False,
+			preferred_time=self.preferred_time,
+			due_date=date.today() + timedelta(days=days_until_due),
+		)
+		self.pet.add_task(new_task)
+		return new_task
 
 
 @dataclass
