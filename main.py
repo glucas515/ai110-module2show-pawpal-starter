@@ -9,7 +9,7 @@ def main() -> None:
 	owner.add_pet(mochi)
 	owner.add_pet(whiskers)
 
-	whiskers.add_task(Task("Grooming", 45, "low", whiskers, preferred_time="16:00"))
+	whiskers.add_task(Task("Grooming", 45, "low", whiskers, preferred_time="08:00"))
 	mochi.add_task(Task("Morning walk", 30, "high", mochi, preferred_time="08:00"))
 	feeding_task = Task("Feeding", 10, "high", mochi, preferred_time="07:30")
 	mochi.add_task(feeding_task)
@@ -51,6 +51,14 @@ def main() -> None:
 	print("Pending tasks")
 	for task in scheduler.filter_tasks(completed=False):
 		print(f"{task.title} ({task.pet.name})")
+
+	print("Conflicts")
+	conflicts = scheduler.detect_conflicts()
+	if conflicts:
+		for warning in conflicts:
+			print(warning)
+	else:
+		print("No conflicts")
 
 
 if __name__ == "__main__":
