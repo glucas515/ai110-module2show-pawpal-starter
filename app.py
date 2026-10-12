@@ -67,17 +67,29 @@ if not owner.pets:
 else:
     pet_index = st.selectbox('Pet', range(len(owner.pets)), format_func=lambda i: owner.pets[i].name)
     selected_pet = owner.pets[pet_index]
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         task_title = st.text_input("Task title", value="Morning walk")
     with col2:
         duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
     with col3:
         priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+    with col4:
+        preferred_time = st.text_input("Preferred time (HH:MM, optional)", value="")
+    with col5:
+        frequency = st.selectbox("Frequency", ["once", "daily", "weekly"], index=1)
 
     if st.button("Add task"):
         try:
-            task = Task(task_title, int(duration), priority, selected_pet)
+            stripped_time = preferred_time.strip()
+            task = Task(
+                task_title,
+                int(duration),
+                priority,
+                selected_pet,
+                frequency=frequency,
+                preferred_time=stripped_time or None,
+            )
             selected_pet.add_task(task)
             st.success(f"Added {task_title} for {selected_pet.name}.")
         except ValueError as error:
@@ -91,6 +103,9 @@ if tasks:
             "title": task.title,
             "duration_minutes": task.duration_minutes,
             "priority": task.priority,
+            "time": task.preferred_time if task.preferred_time is not None else "no time",
+            "frequency": task.frequency,
+            "status": "done" if task.completed else "pending",
         }
         for task in tasks
     ])
