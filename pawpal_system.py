@@ -145,6 +145,19 @@ class Scheduler:
 			if task.completed is False and (task.due_date is None or task.due_date <= date.today())
 		]
 
+	def detect_conflicts(self) -> list[str]:
+		"""Return warnings for pending tasks with matching preferred times."""
+		tasks_by_time: dict[str, list[Task]] = {}
+		for task in self.get_pending_tasks():
+			if task.preferred_time is not None:
+				tasks_by_time.setdefault(task.preferred_time, []).append(task)
+		return [
+			f"Warning: conflict at {preferred_time} - "
+			+ ", ".join(f"{task.title} ({task.pet.name})" for task in tasks_by_time[preferred_time])
+			for preferred_time in sorted(tasks_by_time)
+			if len(tasks_by_time[preferred_time]) >= 2
+		]
+
 	def sort_tasks(self, tasks: list[Task]) -> list[Task]:
 		"""Sort tasks by priority and duration."""
 		return sorted(
