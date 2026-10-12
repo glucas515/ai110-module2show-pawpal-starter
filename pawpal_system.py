@@ -50,6 +50,7 @@ class Task:
 	pet: Pet = field(repr=False, compare=False)
 	frequency: str = 'daily'
 	completed: bool = False
+	preferred_time: str | None = None
 
 	def __post_init__(self) -> None:
 		"""Validate the task data during initialization."""
@@ -59,6 +60,20 @@ class Task:
 			raise ValueError(f"priority must be one of {VALID_PRIORITIES}")
 		if self.frequency not in VALID_FREQUENCIES:
 			raise ValueError(f"frequency must be one of {VALID_FREQUENCIES}")
+		if self.preferred_time is not None:
+			valid_shape = (
+				len(self.preferred_time) == 5
+				and self.preferred_time[2] == ':'
+				and self.preferred_time[:2].isascii()
+				and self.preferred_time[:2].isdigit()
+				and self.preferred_time[3:].isascii()
+				and self.preferred_time[3:].isdigit()
+			)
+			if not valid_shape:
+				raise ValueError("preferred_time must be a valid 24-hour HH:MM string")
+			hours, minutes = (int(part) for part in self.preferred_time.split(':'))
+			if hours > 23 or minutes > 59:
+				raise ValueError("preferred_time must be a valid 24-hour HH:MM string")
 
 	def mark_complete(self) -> None:
 		"""Mark the task as complete."""
