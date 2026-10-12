@@ -62,27 +62,40 @@ else:
 st.markdown("### Tasks")
 st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
 
-if "tasks" not in st.session_state:
-    st.session_state.tasks = []
-
-col1, col2, col3 = st.columns(3)
-with col1:
-    task_title = st.text_input("Task title", value="Morning walk")
-with col2:
-    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
-with col3:
-    priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
-
-if st.button("Add task"):
-    st.session_state.tasks.append(
-        {"title": task_title, "duration_minutes": int(duration), "priority": priority}
-    )
-
-if st.session_state.tasks:
-    st.write("Current tasks:")
-    st.table(st.session_state.tasks)
+if not owner.pets:
+    st.info("Add a pet first.")
 else:
-    st.info("No tasks yet. Add one above.")
+    pet_index = st.selectbox('Pet', range(len(owner.pets)), format_func=lambda i: owner.pets[i].name)
+    selected_pet = owner.pets[pet_index]
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        task_title = st.text_input("Task title", value="Morning walk")
+    with col2:
+        duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+    with col3:
+        priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+
+    if st.button("Add task"):
+        try:
+            task = Task(task_title, int(duration), priority, selected_pet)
+            selected_pet.add_task(task)
+            st.success(f"Added {task_title} for {selected_pet.name}.")
+        except ValueError as error:
+            st.error(str(error))
+
+tasks = owner.get_all_tasks()
+if tasks:
+    st.table([
+        {
+            "pet": task.pet.name,
+            "title": task.title,
+            "duration_minutes": task.duration_minutes,
+            "priority": task.priority,
+        }
+        for task in tasks
+    ])
+else:
+    st.info("No tasks yet.")
 
 st.divider()
 
