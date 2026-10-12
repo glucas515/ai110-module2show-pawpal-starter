@@ -71,6 +71,7 @@ class Scheduler:
 		self.owner = owner
 		self.available_minutes = available_minutes
 		self.plan: list[ScheduledTask] = []
+		self.skipped: list[Task] = []
 
 	def get_all_tasks(self) -> list[Task]:
 		return self.owner.get_all_tasks()
@@ -85,8 +86,25 @@ class Scheduler:
 		)
 
 	def generate_plan(self) -> None:
-		"""Populate self.plan using get_all_tasks() and self.owner.preferences."""
-		pass
+		"""Schedule ordered pending tasks within the available time and record skipped tasks."""
+		self.plan.clear()
+		self.skipped.clear()
+		pending_tasks = self.sort_tasks(self.get_pending_tasks())
+		day_start = self.owner.preferences.get('day_start', '08:00')
+		hours, minutes = (int(part) for part in day_start.split(':'))
+		current_minutes = hours * 60 + minutes
+		minutes_used = 0
+
+		for task in pending_tasks:
+			if minutes_used + task.duration_minutes <= self.available_minutes:
+				start_hours, start_minutes = divmod(current_minutes, 60)
+				self.plan.append(
+					ScheduledTask(task, f'{start_hours:02d}:{start_minutes:02d}')
+				)
+				current_minutes += task.duration_minutes
+				minutes_used += task.duration_minutes
+			else:
+				self.skipped.append(task)
 
 	def explain_plan(self) -> str:
 		"""Return the explanation text for self.plan."""
