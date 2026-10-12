@@ -77,13 +77,15 @@ Sample test output:
 
 > Fill in once you've implemented scheduling logic.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+|        Feature                          Method(s)                               Notes 
+|------------------------------|--------------------------------|----------------------------------|
+|Sorting                   |       Scheduler.sort_by_time()      |    Orders tasks by `preferred_time`, with untimed tasks last.|
 
+ |Filtering                |      Scheduler.filter_tasks()       |       Filters by pet name and/or completion status.           |
+
+ |Conflict detection       |     Scheduler.detect_conflicts()    |    Returns a warning when pending tasks share the same time   |
+
+ |Recurring tasks          |         Task.mark_complete()        |       Creates the next daily or weekly task when one is completed. |
 ## 📸 Demo Walkthrough
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
