@@ -10,6 +10,16 @@ class Owner:
 	preferences: dict[str, object]
 	pets: list["Pet"] = field(default_factory=list)
 
+	def add_pet(self, pet: "Pet") -> None:
+		pet.owner = self
+		self.pets.append(pet)
+
+	def remove_pet(self, pet: "Pet") -> None:
+		self.pets.remove(pet)
+
+	def get_all_tasks(self) -> list["Task"]:
+		return [task for pet in self.pets for task in pet.tasks]
+
 
 @dataclass
 class Pet:
