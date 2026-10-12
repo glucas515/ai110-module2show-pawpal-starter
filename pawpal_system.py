@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 VALID_PRIORITIES = ("low", "medium", "high")
+VALID_FREQUENCIES = ('once', 'daily', 'weekly')
 
 
 @dataclass
@@ -24,12 +25,19 @@ class Task:
 	duration_minutes: int
 	priority: str
 	pet: Pet = field(repr=False, compare=False)
+	frequency: str = 'daily'
+	completed: bool = False
 
 	def __post_init__(self) -> None:
 		if self.duration_minutes <= 0:
 			raise ValueError("duration_minutes must be greater than 0")
 		if self.priority not in VALID_PRIORITIES:
 			raise ValueError(f"priority must be one of {VALID_PRIORITIES}")
+		if self.frequency not in VALID_FREQUENCIES:
+			raise ValueError(f"frequency must be one of {VALID_FREQUENCIES}")
+
+	def mark_complete(self) -> None:
+		self.completed = True
 
 
 @dataclass

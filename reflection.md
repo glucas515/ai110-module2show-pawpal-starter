@@ -22,6 +22,17 @@ I kept Owner, Pet, and Task as plain data holders (implemented as Python datacla
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+Yes, my design changed after I had Copilot review my class skeleton. It flagged four findings and one implementation risk, and I made code changes for most of them.
+
+- ScheduledTask: My original Task only described what needed to be done, but a schedule also has to say when. I added a ScheduledTask class (a task plus a start_time) and gave Scheduler a plan list to hold the results.
+- Explanation output: explain_plan() originally returned nothing, so the UI would have had nothing to display. It now returns a string describing each scheduled task, or "No tasks scheduled." if the plan is empty.
+- Scheduler and Owner: Scheduler originally took both an owner and a separate list of tasks, which created two sources of truth. I removed the tasks parameter and added get_all_tasks(), which collects tasks from the owner's pets.
+- Owner, Pet, and Task relationships: The code only had back-references (Pet.owner, Task.pet), so there was no way to go from an owner to their tasks. I added Owner.pets and Pet.tasks using field(default_factory=list) so instances don't share one mutable list. I also set the back-references to repr=False and compare=False so printing or comparing objects can't recurse forever.
+- Validation: Following Copilot's implementation-risk note, I added a VALID_PRIORITIES constant. Task now raises a ValueError for non-positive durations or unknown priorities, and Scheduler raises one for non-positive available_minutes.
+- Time constraints (partially addressed): ScheduledTask has a start_time, but the scheduler still doesn't accept real time constraints like a day-start time or deadlines. I deliberately deferred this to keep the first version simple and explainable (see Section 2).
+
+As a result, Owner and Pet are no longer pure data holders like I described in 1a. They now manage their own relationships, while Scheduler still holds all of the scheduling logic.
+
 **c. Core user actions**
 
 A user of PawPal+ should be able to:
