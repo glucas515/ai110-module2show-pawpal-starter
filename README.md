@@ -59,19 +59,41 @@ Grooming (Whiskers) [low, 45 min]
 
 ## 🧪 Testing PawPal+
 
+Run the full test suite from the project root:
+
+
+
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The tests in `tests/test_pawpal.py` cover:
+
+- **Task completion and adding tasks:** `mark_complete()` changes a task's status, and `Pet.add_task()` increases the pet's task count.
+- **Sorting:** `sort_by_time()` returns tasks in chronological order, with untimed tasks last.
+- **Recurrence:** completing a daily task creates one new task due tomorrow, completing it twice doesn't create a duplicate, and a one-time task doesn't recur.
+- **Conflict detection:** `detect_conflicts()` warns when two pending tasks share a time, and stays quiet for different times or completed tasks.
+
+Test output:
 
 ```
-# Paste your pytest output here
+PS C:\Users\norai\pawPal\ai110-module2show-pawpal-starter> python -m pytest
+============================= test session starts =============================
+platform win32 -- Python 3.14.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\norai\pawPal\ai110-module2show-pawpal-starter
+plugins: anyio-4.15.1
+collected 7 items
+
+tests\test_pawpal.py .......                                             [100%]
+
+============================== 7 passed in 0.03s ==============================
+
 ```
+
+**Confidence level:** ★★★★☆ (4/5)
+
+All 7 tests pass and they cover the sorting, recurrence and conflict-detection logic. I'm not at 5 stars because `generate_plan()` (exact fits, skipped tasks, empty schedule), filtering and input validation have no unit tests yet. I checked the plan through the `main.py` demo instead.
+
 
 ## 📐 Smarter Scheduling
 
