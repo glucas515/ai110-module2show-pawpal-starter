@@ -12,13 +12,16 @@ class Owner:
 	pets: list["Pet"] = field(default_factory=list)
 
 	def add_pet(self, pet: "Pet") -> None:
+		"""Add a pet to this owner's list of pets."""
 		pet.owner = self
 		self.pets.append(pet)
 
 	def remove_pet(self, pet: "Pet") -> None:
+		"""Remove a pet from this owner's list of pets."""
 		self.pets.remove(pet)
 
 	def get_all_tasks(self) -> list["Task"]:
+		"""Return every task assigned to the owner's pets."""
 		return [task for pet in self.pets for task in pet.tasks]
 
 
@@ -30,10 +33,12 @@ class Pet:
 	tasks: list["Task"] = field(default_factory=list)
 
 	def add_task(self, task: "Task") -> None:
+		"""Add a task to this pet's task list."""
 		task.pet = self
 		self.tasks.append(task)
 
 	def remove_task(self, task: "Task") -> None:
+		"""Remove a task from this pet's task list."""
 		self.tasks.remove(task)
 
 
@@ -47,6 +52,7 @@ class Task:
 	completed: bool = False
 
 	def __post_init__(self) -> None:
+		"""Validate the task data during initialization."""
 		if self.duration_minutes <= 0:
 			raise ValueError("duration_minutes must be greater than 0")
 		if self.priority not in VALID_PRIORITIES:
@@ -55,6 +61,7 @@ class Task:
 			raise ValueError(f"frequency must be one of {VALID_FREQUENCIES}")
 
 	def mark_complete(self) -> None:
+		"""Mark the task as complete."""
 		self.completed = True
 
 
@@ -66,6 +73,7 @@ class ScheduledTask:
 
 class Scheduler:
 	def __init__(self, owner: Owner, available_minutes: int) -> None:
+		"""Initialize the scheduler with an owner and available minutes."""
 		if available_minutes <= 0:
 			raise ValueError("available_minutes must be greater than 0")
 		self.owner = owner
@@ -74,12 +82,15 @@ class Scheduler:
 		self.skipped: list[Task] = []
 
 	def get_all_tasks(self) -> list[Task]:
+		"""Return all tasks for the owner managed by this scheduler."""
 		return self.owner.get_all_tasks()
 
 	def get_pending_tasks(self) -> list[Task]:
+		"""Return the tasks that are still incomplete."""
 		return [task for task in self.get_all_tasks() if task.completed is False]
 
 	def sort_tasks(self, tasks: list[Task]) -> list[Task]:
+		"""Sort tasks by priority and duration."""
 		return sorted(
 			tasks,
 			key=lambda task: (PRIORITY_ORDER[task.priority], task.duration_minutes),
