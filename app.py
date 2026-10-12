@@ -59,6 +59,9 @@ if owner.pets:
 else:
     st.info("No pets yet.")
 
+available_minutes = st.number_input('Available minutes today', min_value=1, max_value=720, value=60)
+scheduler = Scheduler(owner, available_minutes)
+
 st.markdown("### Tasks")
 st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
 
@@ -95,22 +98,32 @@ else:
         except ValueError as error:
             st.error(str(error))
 
-tasks = owner.get_all_tasks()
+filter_col1, filter_col2 = st.columns(2)
+with filter_col1:
+    selected_pet_name = st.selectbox("Filter by pet", ["All pets"] + [pet.name for pet in owner.pets])
+with filter_col2:
+    selected_status = st.selectbox("Filter by status", ["All", "Pending", "Completed"])
+
+pet_filter = None if selected_pet_name == "All pets" else selected_pet_name
+completed_filter = {"All": None, "Pending": False, "Completed": True}[selected_status]
+tasks = scheduler.sort_by_time(
+    scheduler.filter_tasks(pet_name=pet_filter, completed=completed_filter)
+)
 if tasks:
     st.table([
         {
             "pet": task.pet.name,
             "title": task.title,
+            "time": task.preferred_time if task.preferred_time is not None else "no time",
             "duration_minutes": task.duration_minutes,
             "priority": task.priority,
-            "time": task.preferred_time if task.preferred_time is not None else "no time",
             "frequency": task.frequency,
             "status": "done" if task.completed else "pending",
         }
         for task in tasks
     ])
 else:
-    st.info("No tasks yet.")
+    st.info("No tasks match.")
 
 st.divider()
 
